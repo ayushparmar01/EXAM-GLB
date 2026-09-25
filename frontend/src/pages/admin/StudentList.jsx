@@ -240,8 +240,8 @@ const StudentList = () => {
         showToast(`Student details for '${studentForm.name}' updated successfully!`);
         setIsEditModalOpen(false);
       } else {
-        const res = await studentService.createStudent(studentForm);
-        showToast(`Student '${studentForm.name}' added successfully! Temporary Password: ${res.data.temporaryPassword}`);
+        await studentService.createStudent(studentForm);
+        showToast(`Student '${studentForm.name}' added successfully!`);
         setIsAddModalOpen(false);
       }
       fetchStudents(true);
@@ -260,22 +260,6 @@ const StudentList = () => {
       fetchStudents(true);
     } catch (err) {
       showToast(err.message || 'Failed to toggle status', 'error');
-    }
-  };
-
-  const handleResetPasswordSubmit = async (e) => {
-    e.preventDefault();
-    setFormSubmitting(true);
-    setFormError('');
-
-    try {
-      const res = await studentService.resetStudentPassword(selectedStudent._id, newPasswordInput.trim() || null);
-      setResetSuccessData(res.data);
-      showToast(`Password successfully reset for ${selectedStudent.name}`);
-    } catch (err) {
-      setFormError(err.message || 'Failed to reset password');
-    } finally {
-      setFormSubmitting(false);
     }
   };
 
@@ -386,36 +370,17 @@ const StudentList = () => {
   // Download Sample CSV Template
   const handleDownloadSampleCsv = () => {
     const csvContent =
-      'Name,Roll Number,Enrollment Number,Email,Branch,Semester,Section,Batch,Password\n' +
-      'Aarav Sharma,21CS001,EN2021001,aarav.sharma@college.edu,CSE,6,A,2021-2025,SecurePass@123\n' +
-      'Diya Patel,21CS002,EN2021002,diya.patel@college.edu,CSE,6,A,2021-2025,\n' +
-      'Rohan Gupta,21IT015,EN2021045,rohan.gupta@college.edu,IT,6,B,2021-2025,\n' +
-      'Ananya Verma,22EC010,EN2022010,ananya.verma@college.edu,ECE,4,A,2022-2026,';
+      'Email,Roll Number,Enrollment Number,Branch,Semester,Section,Batch,Status,Name\n' +
+      'student1@college.edu,23CSE001,GLB2023001,CSE,5,A,2023-2027,ACTIVE,Aarav Sharma\n' +
+      'student2@college.edu,23CSE002,GLB2023002,CSE,5,A,2023-2027,ACTIVE,Diya Patel\n' +
+      'student3@college.edu,23IT015,GLB2023045,IT,5,B,2023-2027,ACTIVE,Rohan Gupta\n' +
+      'student4@college.edu,23EC010,GLB2023010,ECE,3,A,2024-2028,ACTIVE,Ananya Verma\n';
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
     link.setAttribute('download', 'GLB_ExamSphere_Student_Import_Template.csv');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  // Export Credential Sheet after Import
-  const handleDownloadCredentialsCsv = () => {
-    if (!importResult || !importResult.credentialsReport) return;
-
-    let csvContent = 'Name,Roll Number,Enrollment Number,Email,Branch,Section,Temporary Password\n';
-    importResult.credentialsReport.forEach((c) => {
-      csvContent += `"${c.name}","${c.rollNumber}","${c.enrollmentNumber}","${c.email}","${c.branch}","${c.section}","${c.temporaryPassword}"\n`;
-    });
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `GLB_Imported_Student_Credentials_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -1252,51 +1217,39 @@ const StudentList = () => {
                   </div>
                   <h3 style={{ fontSize: '1.35rem', color: '#0F172A', marginBottom: '0.35rem' }}>Bulk Import Completed!</h3>
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-                    Successfully imported <strong>{importResult.importedCount}</strong> students.
+                    Successfully imported <strong>{importResult.importedCount}</strong> student academic profiles into the institutional roster.
                   </p>
                 </div>
 
-                {/* Summary Box */}
-                <div style={{ background: '#F8FAFC', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1rem', marginBottom: '1.5rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                    <span style={{ fontWeight: 700, fontSize: '0.875rem', color: '#0F172A' }}>
-                      Generated Student Login Credentials ({importResult.credentialsReport?.length || 0})
-                    </span>
-                    <button
-                      onClick={handleDownloadCredentialsCsv}
-                      className="btn btn-secondary"
-                      style={{ fontSize: '0.78rem', padding: '0.35rem 0.75rem' }}
-                    >
-                      <Download size={13} />
-                      Export Credentials CSV
-                    </button>
+                {/* Summary Metrics */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+                  <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '12px', padding: '1.25rem', textAlign: 'center' }}>
+                    <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#16A34A' }}>{importResult.importedCount}</div>
+                    <div style={{ fontSize: '0.8rem', color: '#15803D', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Students Imported</div>
                   </div>
+                  <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '1.25rem', textAlign: 'center' }}>
+                    <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#64748B' }}>{importResult.skippedCount}</div>
+                    <div style={{ fontSize: '0.8rem', color: '#64748B', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Students Failed / Skipped</div>
+                  </div>
+                </div>
 
-                  <div style={{ maxHeight: '200px', overflowY: 'auto', background: '#FFFFFF', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
-                    <table className="data-table" style={{ fontSize: '0.78rem' }}>
-                      <thead>
-                        <tr>
-                          <th>Name</th>
-                          <th>Email</th>
-                          <th>Roll No</th>
-                          <th>Temporary Password</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {(importResult.credentialsReport || []).slice(0, 50).map((c, idx) => (
-                          <tr key={idx}>
-                            <td style={{ fontWeight: 600 }}>{c.name}</td>
-                            <td>{c.email}</td>
-                            <td>{c.rollNumber}</td>
-                            <td>
-                              <code style={{ background: '#F1F5F9', padding: '0.15rem 0.35rem', borderRadius: '4px' }}>
-                                {c.temporaryPassword}
-                              </code>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                {/* Information Notice */}
+                <div style={{
+                  background: 'rgba(2, 132, 199, 0.08)',
+                  border: '1px solid rgba(2, 132, 199, 0.25)',
+                  borderRadius: '12px',
+                  padding: '1rem 1.25rem',
+                  marginBottom: '1.5rem',
+                  fontSize: '0.85rem',
+                  color: '#0369A1',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  lineHeight: 1.5
+                }}>
+                  <ShieldAlert size={20} style={{ flexShrink: 0 }} />
+                  <div>
+                    <strong>Google Identity Authentication Active:</strong> Students will authenticate seamlessly using their official college Google account. No plaintext passwords or password hashes are required or stored in GLB ExamSphere.
                   </div>
                 </div>
 
@@ -1357,11 +1310,11 @@ const StudentList = () => {
                 </div>
 
                 <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                  <label className="form-label">Email Address *</label>
+                  <label className="form-label">College Email Address *</label>
                   <input
                     type="email"
                     className="form-input"
-                    placeholder="aarav.sharma@college.edu"
+                    placeholder="student1@college.edu"
                     value={studentForm.email}
                     onChange={(e) => setStudentForm({ ...studentForm, email: e.target.value })}
                     required
@@ -1373,7 +1326,7 @@ const StudentList = () => {
                   <input
                     type="text"
                     className="form-input"
-                    placeholder="21CS001"
+                    placeholder="23CSE001"
                     value={studentForm.rollNumber}
                     onChange={(e) => setStudentForm({ ...studentForm, rollNumber: e.target.value })}
                     required
@@ -1385,7 +1338,7 @@ const StudentList = () => {
                   <input
                     type="text"
                     className="form-input"
-                    placeholder="EN2021001"
+                    placeholder="GLB2023001"
                     value={studentForm.enrollmentNumber}
                     onChange={(e) => setStudentForm({ ...studentForm, enrollmentNumber: e.target.value })}
                     required
@@ -1409,7 +1362,7 @@ const StudentList = () => {
                   <input
                     type="text"
                     className="form-input"
-                    placeholder="e.g. 6"
+                    placeholder="e.g. 5"
                     value={studentForm.semester}
                     onChange={(e) => setStudentForm({ ...studentForm, semester: e.target.value })}
                     required
@@ -1433,25 +1386,12 @@ const StudentList = () => {
                   <input
                     type="text"
                     className="form-input"
-                    placeholder="2021-2025"
+                    placeholder="2023-2027"
                     value={studentForm.batch}
                     onChange={(e) => setStudentForm({ ...studentForm, batch: e.target.value })}
                     required
                   />
                 </div>
-
-                {isAddModalOpen && (
-                  <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                    <label className="form-label">Initial Password (Optional - auto-generated if blank)</label>
-                    <input
-                      type="password"
-                      className="form-input"
-                      placeholder="Minimum 6 characters"
-                      value={studentForm.password}
-                      onChange={(e) => setStudentForm({ ...studentForm, password: e.target.value })}
-                    />
-                  </div>
-                )}
 
                 <div className="form-group" style={{ gridColumn: 'span 2' }}>
                   <label className="form-label">Account Status</label>

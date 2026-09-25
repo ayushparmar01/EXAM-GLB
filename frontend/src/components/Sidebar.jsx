@@ -139,7 +139,7 @@ const Sidebar = ({ isOpen, onClose }) => {
           <span style={{ color: '#94a3b8', fontWeight: 600 }}>System Active</span>
         </div>
         <div style={{ color: 'var(--text-subtle)', fontSize: '0.7rem' }}>
-          GLB EXAMSPHERE Engine v2.4 • 256-bit Encrypted
+          GLB ExamSphere • GL Bajaj Mathura
         </div>
       </div>
     </aside>

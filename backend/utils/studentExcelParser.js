@@ -54,7 +54,11 @@ const getFieldFromHeader = (normalized) => {
   if (['batch', 'academicyear', 'session', 'batchyear', 'year'].includes(normalized)) {
     return 'batch';
   }
-  // Password (optional)
+  // Status
+  if (['status', 'accountstatus', 'state'].includes(normalized)) {
+    return 'status';
+  }
+  // Password (optional / ignored)
   if (['password', 'pass', 'pwd', 'initialpassword'].includes(normalized)) {
     return 'password';
   }
@@ -237,7 +241,7 @@ const validateAndProcessStudentRows = async (rawRows) => {
     const rowNum = row._rowNumber;
     const errors = [];
 
-    const name = (row.name || '').trim();
+    const rawName = (row.name || '').trim();
     const email = (row.email || '').trim().toLowerCase();
     const rollNumber = (row.rollNumber || '').trim();
     const enrollmentNumber = (row.enrollmentNumber || '').trim();
@@ -245,10 +249,13 @@ const validateAndProcessStudentRows = async (rawRows) => {
     const semester = (row.semester || '').trim();
     const section = (row.section || '').trim();
     const batch = (row.batch || '').trim();
+    const status = (row.status || '').trim().toUpperCase() === 'INACTIVE' ? 'INACTIVE' : 'ACTIVE';
     const password = (row.password || '').trim();
 
+    const name = rawName || (email ? email.split('@')[0] : '');
+
     // Required fields check
-    if (!name) errors.push('Student Name is required');
+    if (!name && !email) errors.push('Student Name or Email is required');
     if (!email) errors.push('Email address is required');
     else if (!isValidEmail(email)) errors.push(`Invalid email format (${email})`);
 
@@ -258,10 +265,6 @@ const validateAndProcessStudentRows = async (rawRows) => {
     if (!semester) errors.push('Semester is required');
     if (!section) errors.push('Section is required');
     if (!batch) errors.push('Batch is required');
-
-    if (password && password.length < 6) {
-      errors.push('Password must be at least 6 characters');
-    }
 
     const studentObj = {
       rowNumber: rowNum,
@@ -273,6 +276,7 @@ const validateAndProcessStudentRows = async (rawRows) => {
       semester,
       section,
       batch,
+      status,
       hasCustomPassword: Boolean(password),
       password: password || null
     };

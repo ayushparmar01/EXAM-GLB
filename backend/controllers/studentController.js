@@ -133,15 +133,14 @@ exports.confirmImport = async (req, res, next) => {
       existingRollSet.add(cleanRoll.toLowerCase());
       existingEnrollSet.add(cleanEnroll.toLowerCase());
 
-      const rawPassword = student.password && String(student.password).trim().length >= 6
-        ? String(student.password).trim()
-        : generateSecureTemporaryPassword();
+      let hashedPassword = undefined;
+      if (student.password && String(student.password).trim().length >= 6) {
+        const salt = await bcrypt.genSalt(10);
+        hashedPassword = await bcrypt.hash(String(student.password).trim(), salt);
+      }
 
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(rawPassword, salt);
-
-      studentsToInsert.push({
-        name: (student.name || '').trim(),
+      const studentDoc = {
+        name: (student.name || '').trim() || cleanEmail.split('@')[0],
         email: cleanEmail,
         rollNumber: cleanRoll,
         enrollmentNumber: cleanEnroll,
@@ -149,22 +148,17 @@ exports.confirmImport = async (req, res, next) => {
         semester: (student.semester || '').trim(),
         section: (student.section || '').trim(),
         batch: (student.batch || '').trim(),
-        password: hashedPassword,
         role: 'STUDENT', // SECURITY: Strictly enforced
-        status: 'ACTIVE',
+        status: (student.status || '').toUpperCase() === 'INACTIVE' ? 'INACTIVE' : 'ACTIVE',
         isVerified: true,
         createdAt: new Date()
-      });
+      };
 
-      credentialsReport.push({
-        name: (student.name || '').trim(),
-        email: cleanEmail,
-        rollNumber: cleanRoll,
-        enrollmentNumber: cleanEnroll,
-        branch: (student.branch || '').trim(),
-        section: (student.section || '').trim(),
-        temporaryPassword: rawPassword
-      });
+      if (hashedPassword) {
+        studentDoc.password = hashedPassword;
+      }
+
+      studentsToInsert.push(studentDoc);
     }
 
     if (studentsToInsert.length === 0) {
@@ -181,10 +175,9 @@ exports.confirmImport = async (req, res, next) => {
 
     res.status(201).json({
       success: true,
-      message: `Successfully imported ${inserted.length} candidate students into database!`,
+      message: `Successfully imported ${inserted.length} student candidate(s) into database!`,
       importedCount: inserted.length,
       skippedCount: skippedRecords.length,
-      credentialsReport,
       skippedRecords
     });
   } catch (error) {
@@ -367,11 +360,7 @@ exports.createStudent = async (req, res, next) => {
       }
     }
 
-    const rawPassword = password && String(password).trim().length >= 6
-      ? String(password).trim()
-      : generateSecureTemporaryPassword();
-
-    const student = await User.create({
+    const studentDoc = {
       name: cleanName,
       email: cleanEmail,
       rollNumber: cleanRoll,
@@ -380,11 +369,16 @@ exports.createStudent = async (req, res, next) => {
       semester: semester ? String(semester).trim() : '',
       section: section ? String(section).trim() : '',
       batch: batch ? String(batch).trim() : '',
-      password: rawPassword, // Encrypted by UserSchema pre-save hook
       status: status === 'INACTIVE' ? 'INACTIVE' : 'ACTIVE',
       role: 'STUDENT',
       isVerified: true
-    });
+    };
+
+    if (password && String(password).trim().length >= 6) {
+      studentDoc.password = String(password).trim();
+    }
+
+    const student = await User.create(studentDoc);
 
     res.status(201).json({
       success: true,
@@ -399,8 +393,7 @@ exports.createStudent = async (req, res, next) => {
         semester: student.semester,
         section: student.section,
         batch: student.batch,
-        status: student.status,
-        temporaryPassword: rawPassword
+        status: student.status
       }
     });
   } catch (error) {

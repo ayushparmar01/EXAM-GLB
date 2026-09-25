@@ -101,7 +101,7 @@ const Login = () => {
           </span>
         </div>
 
-        <div style={{ textAlign: 'center', marginBottom: '2.25rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div style={{
             width: '58px',
             height: '58px',
@@ -116,9 +116,9 @@ const Login = () => {
           }}>
             <GraduationCap size={32} />
           </div>
-          <h1 style={{ fontSize: '1.85rem', marginBottom: '0.35rem', color: '#0f172a' }}>Sign in to Portal</h1>
+          <h1 style={{ fontSize: '1.85rem', marginBottom: '0.35rem', color: '#0f172a' }}>College Portal Sign In</h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.925rem' }}>
-            Enter your college credentials to access your examinations
+            Access examinations and academic assessments
           </p>
         </div>
 
@@ -140,15 +140,69 @@ const Login = () => {
           </div>
         )}
 
+        {/* PRIMARY OPTION: STUDENT COLLEGE GOOGLE SIGN IN */}
+        <div style={{
+          background: 'rgba(2, 132, 199, 0.05)',
+          border: '1.5px solid rgba(2, 132, 199, 0.25)',
+          borderRadius: '16px',
+          padding: '1.5rem 1.25rem',
+          marginBottom: '1.75rem',
+          textAlign: 'center'
+        }}>
+          <div style={{
+            fontSize: '0.8rem',
+            fontWeight: 800,
+            color: '#0284c7',
+            textTransform: 'uppercase',
+            letterSpacing: '0.06em',
+            marginBottom: '0.35rem'
+          }}>
+            Candidate & Student Login
+          </div>
+          <p style={{ color: '#475569', fontSize: '0.85rem', marginBottom: '1.25rem', lineHeight: 1.4 }}>
+            Sign in with your verified institutional Google account.
+          </p>
+
+          <GoogleAuthButton role="STUDENT" label="Continue with College Google Account" />
+
+          <div style={{
+            fontSize: '0.75rem',
+            color: '#64748b',
+            marginTop: '0.85rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.35rem'
+          }}>
+            <span>🔒 Only pre-registered college accounts can access the platform</span>
+          </div>
+        </div>
+
+        {/* DIVIDER FOR FACULTY & ADMIN */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1rem',
+          margin: '1.75rem 0 1.25rem',
+          color: 'var(--text-subtle)',
+          fontSize: '0.75rem',
+          fontWeight: 700,
+          letterSpacing: '0.06em'
+        }}>
+          <div style={{ flex: 1, height: '1px', background: 'var(--border-color)' }} />
+          <span>FACULTY & ADMINISTRATOR ACCESS</span>
+          <div style={{ flex: 1, height: '1px', background: 'var(--border-color)' }} />
+        </div>
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label className="form-label">College Email Address</label>
+            <label className="form-label">Staff / Department Email</label>
             <div style={{ position: 'relative' }}>
               <input
                 type="email"
                 name="email"
                 className="form-input"
-                placeholder="student@college.edu"
+                placeholder="faculty@college.edu"
                 value={formData.email}
                 onChange={handleChange}
                 style={{ paddingLeft: '2.6rem' }}
@@ -185,47 +239,30 @@ const Login = () => {
             className="btn btn-primary"
             style={{
               width: '100%',
-              marginTop: '1.25rem',
-              height: '48px',
-              fontSize: '0.975rem',
+              marginTop: '1rem',
+              height: '46px',
+              fontSize: '0.925rem',
               fontWeight: 700
             }}
             disabled={loading}
           >
-            {loading ? 'Authenticating...' : (
+            {loading ? 'Authenticating Staff...' : (
               <>
                 <LogIn size={18} />
-                Sign In to Portal
+                Sign In to Staff Console
               </>
             )}
           </button>
         </form>
 
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem',
-          margin: '1.75rem 0',
-          color: 'var(--text-subtle)',
-          fontSize: '0.78rem',
-          fontWeight: 600,
-          letterSpacing: '0.05em'
-        }}>
-          <div style={{ flex: 1, height: '1px', background: 'var(--border-color)' }} />
-          <span>OR SIGN IN WITH</span>
-          <div style={{ flex: 1, height: '1px', background: 'var(--border-color)' }} />
-        </div>
-
-        <GoogleAuthButton label="Continue with College Google Account" />
-
         {/* Administration Preloaded Notice */}
         <div style={{
-          marginTop: '2rem',
+          marginTop: '1.75rem',
           padding: '0.85rem 1rem',
           borderRadius: '12px',
           background: 'rgba(255, 255, 255, 0.03)',
           border: '1px solid rgba(255, 255, 255, 0.06)',
-          fontSize: '0.8rem',
+          fontSize: '0.78rem',
           color: '#94a3b8',
           display: 'flex',
           alignItems: 'flex-start',
@@ -234,7 +271,7 @@ const Login = () => {
         }}>
           <Info size={16} color="#38bdf8" style={{ flexShrink: 0, marginTop: '2px' }} />
           <div>
-            Student accounts are preloaded and managed by your college examination administration. If you do not have credentials, please contact your department coordinator.
+            Candidate student accounts are managed by your college examination administration. Self-registration is disabled.
           </div>
         </div>
       </div>

@@ -57,23 +57,11 @@ const Navbar = ({ onToggleSidebar }) => {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
               <span style={{ fontSize: '1.2rem', fontWeight: 900, fontFamily: 'Outfit', letterSpacing: '-0.02em', color: '#fff', lineHeight: 1 }}>
-                GLB <span style={{ color: '#0EA5E9' }}>EXAMSPHERE</span>
-              </span>
-              <span style={{
-                fontSize: '0.62rem',
-                fontWeight: 800,
-                letterSpacing: '0.08em',
-                padding: '0.15rem 0.45rem',
-                borderRadius: '4px',
-                background: 'rgba(14, 165, 233, 0.2)',
-                color: '#38BDF8',
-                border: '1px solid rgba(14, 165, 233, 0.4)'
-              }}>
-                ENTERPRISE
+                GLB <span style={{ color: '#0EA5E9' }}>ExamSphere</span>
               </span>
             </div>
             <div style={{ fontSize: '0.72rem', color: '#94A3B8', letterSpacing: '0.01em', marginTop: '2px' }}>
-              Assessment Cloud
+              GL Bajaj Group of Institutions, Mathura
             </div>
           </div>
         </Link>
